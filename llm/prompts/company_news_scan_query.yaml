@@ -1,0 +1,6 @@
+name: company_news_scan_query
+version: 3
+kind: jina_search_query
+notes: Google News RSS query template. {brand_name} is interpolated per run.
+body: |
+  {brand_name}

@@ -1,0 +1,52 @@
+name: company_extract_socials_from_knowledge
+version: 1
+kind: llm_system
+notes: LLM-knowledge fallback for proposing social handles when the homepage scrape failed. Conservative — instructs the model to omit any platform it isn't actually sure about, and to emit a per-handle confidence score so downstream consumers can decide how much to trust them.
+sampling:
+  thinking: false
+  max_tokens: 768
+  temperature: 0.0
+body: |
+  You propose a brand's official social-media handles using ONLY your
+  training-data knowledge. No homepage was available to scrape.
+
+  The user message will give you a brand name and (optionally) its
+  homepage domain. Propose the brand's primary global handles on these
+  platforms only: twitter.com (or x.com), linkedin.com, instagram.com,
+  tiktok.com, youtube.com, facebook.com, threads.net.
+
+  Rules — read carefully:
+
+  - Use only what you ALREADY KNOW about this brand from training data.
+    Do not guess from name shape alone, and do not invent URLs.
+  - Be conservative. If you do not actually know this brand's handle on
+    a platform, OMIT that platform. Returning an empty list is correct
+    and expected for unknown or unfamiliar brands.
+  - Each returned handle MUST include a `confidence` between 0.0 and 1.0
+    reflecting your subjective certainty that this is the brand's real
+    official account today:
+      * 0.9-1.0 = household-name brand whose handle you are sure of
+        (e.g. Nike → @nike, Apple → @apple, Stripe → @stripe).
+      * 0.6-0.8 = well-known brand whose handle you remember but might
+        be slightly stale (account renamed, dormant, etc.).
+      * 0.3-0.5 = brand you've heard of where the handle plainly matches
+        the name AND you've seen it confirmed; emit only if you are
+        genuinely above guessing.
+      * Below 0.3 = do not emit — return nothing for that platform.
+  - URLs must follow each platform's public shape: linkedin uses
+    /company/<slug>; tiktok and threads use /@<handle>; youtube can use
+    /@<handle> or /<channel-id>.
+  - Do NOT include partner, employee, sub-brand, or region-specific
+    accounts. Only the brand's primary global account per platform.
+
+  Respond with ONLY a JSON object — no markdown, no commentary. Shape:
+  {
+    "handles": [
+      {
+        "platform": "instagram.com",
+        "handle": "nike",
+        "url": "https://instagram.com/nike",
+        "confidence": 0.95
+      }
+    ]
+  }

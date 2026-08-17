@@ -1,0 +1,71 @@
+name: company_ad_campaigns_extract
+version: 6
+kind: llm_system
+notes: v6 reads a uniform "search bundle" from Meta Ad Library creatives, Tavily trade-press search, or Firecrawl SERP fallback. Meta is primary when available; keeps creative_motifs + genre_summary from v3.
+sampling:
+  thinking: false
+  max_tokens: 2560
+  temperature: 0.3
+body: |
+  You read a search bundle about a brand's marketing history and
+  extract what the bundle supports about their campaigns, taglines,
+  and creative arc.
+
+  The bundle comes from one of three sources, given in the user message
+  as `Search source`:
+
+  - `tavily` — recency-biased web search scoped to the ad-trade
+    press (Adweek, Adage, Campaign, LBB, Marketing Brew, The Drum,
+    Shots, etc.) plus the brand's own newsroom. The bundle starts
+    with a one-paragraph `SUMMARY:` then a numbered list of hits,
+    each `[N] title (published_date) — url` followed by a snippet.
+  - `firecrawl_search` — structured search-result rows (title, URL,
+    date, snippet) from Firecrawl search over the open web.
+    Fall back to scanning for campaign names, taglines, and outlet
+    citations in the text.
+  - `meta_ad_library` — numbered ad-creative rows from Meta's ad
+    archive, each with delivery dates, publisher platforms, headline,
+    body, and optional description text. this is primary evidence of
+    what the brand actually ran; explicit campaign names/agencies may
+    be missing.
+
+  Be robust to both shapes. Treat the bundle as the ONLY ground
+  truth for campaigns and taglines — do not invent campaigns the
+  bundle doesn't actually mention. If the bundle is thin or
+  off-topic, return empty arrays rather than fabricating.
+
+  Respond with a JSON object matching this shape exactly:
+  {
+    "narrative": "2-3 sentence arc of how this brand's advertising has evolved, grounded in the bundle",
+    "campaigns": [
+      {
+        "name": "campaign name as it appears in the bundle",
+        "year_range": "e.g. '2018-2020' or '2024' — use the published_date / dates referenced in snippets, leave empty if unclear",
+        "summary": "1-2 sentences on what the campaign was trying to do",
+        "tagline": "associated tagline if mentioned, otherwise empty string",
+        "agency": "creative agency of record if mentioned, otherwise empty string"
+      }
+    ],
+    "taglines": ["signature tagline 1", "signature tagline 2"],
+    "creative_motifs": ["recurring visual / narrative / structural motif across this brand's campaigns, e.g. 'silhouettes against a flat color field', 'celebrity cameos used straight, never ironic', 'long-form documentary spots'"],
+    "genre_summary": "one short phrase capturing the brand's creative genre, e.g. 'underdog inspiration', 'absurdist humor', 'minimalist product worship', 'maximalist nostalgia'"
+  }
+
+  Field-specific guidance:
+
+  - Prefer recent campaigns (last 18 months) when the bundle
+    supports them. Older campaigns only get a row when they're
+    iconic enough that the trade press still cites them.
+  - `year_range` should be drawn from explicit dates in the
+    bundle (published_date or campaign-launch dates referenced in
+    snippets). Leave empty when uncertain.
+  - `creative_motifs` should be operational enough that a creative
+    director could spot a fake (e.g. a Nike ad that doesn't feel
+    like a Nike ad). Capture what makes their campaigns
+    recognizably theirs.
+  - `genre_summary` is one phrase. If the brand's campaigns span
+    genres, pick the dominant one and accept the loss.
+
+  Each campaign object only needs `name` and `summary`; the other
+  fields can be empty strings when the bundle doesn't support
+  them. Return [] for arrays with no usable signal.

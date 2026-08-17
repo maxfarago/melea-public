@@ -1,0 +1,37 @@
+name: company_audience_reception_extract
+version: 1
+kind: llm_system
+notes: Extract audience reception (sentiment, praise, criticism, communities) from a Jina Search SERP about the brand.
+sampling:
+  thinking: false
+  max_tokens: 2048
+  temperature: 0.3
+body: |
+  You analyze how the public actually receives and discusses a brand.
+
+  Given a search-engine results page (SERP markdown) containing reviews,
+  forum threads, community posts, and articles ABOUT the brand (not from
+  the brand), produce a structured reception summary.
+
+  Required fields:
+
+  - `narrative`: 2-4 sentence paragraph capturing the dominant public
+    posture toward the brand right now. Be opinionated. If sentiment is
+    genuinely mixed, say so concretely.
+  - `praise_themes`: what audiences consistently like (3-6 items, each a
+    short phrase).
+  - `criticism_themes`: what audiences consistently complain about (3-6
+    items, each a short phrase).
+  - `communities`: 2-5 specific communities / subreddits / forums where
+    this brand gets discussed (e.g. "r/buildapc", "Hacker News",
+    "fashion-TikTok").
+  - `loud_topics`: 2-5 short phrases for topics that drive disproportionate
+    discussion, positive or negative.
+  - `sentiment`: one of "positive", "mixed_positive", "mixed",
+    "mixed_negative", "negative", "unknown".
+
+  If the SERP doesn't actually contain audience discussion (e.g. just brand
+  marketing pages), say "unknown" for sentiment and use empty arrays
+  rather than fabricating.
+
+  Respond with a JSON object matching the fields above exactly.

@@ -1,0 +1,564 @@
+/* melea ops admin shell — light mode, overrides on top of the shared tokens/shell. */
+
+/* cool blue-white palette — overrides the warm light theme from tokens.css */
+html[data-theme="light"] {
+  --bg: #f4f6fa;
+  --panel: #eaecf2;
+  --header-bg: #dde1ec;
+  --border: #cdd3e0;
+  --text: #1a1f2e;
+  --text-dim: #5a6478;
+}
+
+body.is-ops .sidebar {
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+}
+
+body.is-ops .sidebar-header {
+  background: var(--header-bg);
+  border-radius: 24px 24px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+body.is-ops #sidebar-list {
+  background: var(--panel);
+  border-radius: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body.is-ops #sidebar-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* fix hardcoded dark rgba borders that don't adapt to light mode */
+.job-item {
+  border-bottom-color: var(--border);
+}
+
+body.is-ops .job-item.audience-sidebar-item {
+  height: var(--cell);
+  min-height: var(--cell);
+  max-height: var(--cell);
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+body.is-ops .job-item.audience-sidebar-item .job-item-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+body.is-ops .ops-audience-sidebar-avatar {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+body.is-ops .ops-audience-sidebar-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+body.is-ops .ops-audience-sidebar-title {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.25;
+}
+
+body.is-ops .ops-audience-detail-top {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+body.is-ops .ops-audience-member-profile,
+body.is-ops .ops-audience-metadata-section,
+body.is-ops .ops-audience-following-section {
+  margin-bottom: 0;
+  min-width: 0;
+  min-height: 0;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body.is-ops .ops-audience-member-profile .section-body,
+body.is-ops .ops-audience-metadata-section .section-body,
+body.is-ops .ops-audience-following-section .section-body {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 16px 16px;
+  overflow-y: auto;
+}
+
+body.is-ops .ops-audience-member-top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}
+
+body.is-ops .ops-audience-member-avatar-wrap {
+  flex-shrink: 0;
+}
+
+body.is-ops .ops-audience-member-avatar,
+body.is-ops .ops-audience-member-avatar-fallback {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+body.is-ops .ops-audience-member-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+body.is-ops .ops-audience-member-identity {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+body.is-ops .ops-audience-member-handle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+body.is-ops .ops-audience-member-location,
+body.is-ops .ops-audience-member-email {
+  font-size: 12px;
+  color: var(--text-dim);
+  word-break: break-word;
+}
+
+body.is-ops .ops-audience-member-metrics {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  width: 100%;
+}
+
+body.is-ops .ops-audience-metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+body.is-ops .ops-audience-metric-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.is-ops .ops-audience-metric-value {
+  font-size: 11px;
+  color: var(--text);
+  text-align: right;
+  word-break: break-word;
+}
+
+body.is-ops .ops-audience-metadata-section .section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+body.is-ops .ops-audience-metadata-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+body.is-ops .ops-audience-metadata-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.is-ops .ops-audience-metadata-value {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+body.is-ops .ops-audience-follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.is-ops .ops-audience-follow-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+body.is-ops .ops-audience-follow-row-avatar {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+body.is-ops .ops-audience-follow-row-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body.is-ops .ops-audience-follow-row-lockup {
+  flex: 1;
+  min-width: 0;
+}
+
+body.is-ops .ops-audience-follow-row-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.is-ops .ops-audience-follow-row-handle {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.is-ops .ops-audience-follow-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+body.is-ops .ops-audience-follow-action {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+body.is-ops .ops-audience-follow-action:hover,
+body.is-ops .ops-audience-follow-action:focus-visible {
+  background: var(--header-bg);
+  color: var(--text);
+}
+
+body.is-ops .ops-audience-follow-action svg {
+  width: 14px;
+  height: 14px;
+}
+
+body.is-ops .ops-audience-follow-tooltip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  width: min(240px, 70vw);
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(26, 31, 46, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 20;
+}
+
+body.is-ops .ops-audience-follow-action:hover .ops-audience-follow-tooltip,
+body.is-ops .ops-audience-follow-action:focus-visible .ops-audience-follow-tooltip,
+body.is-ops .ops-audience-follow-action:focus-within .ops-audience-follow-tooltip {
+  opacity: 1;
+}
+
+body.is-ops .ops-audience-follow-tooltip-label {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.is-ops .ops-audience-follow-tooltip-label:first-child {
+  margin-top: 0;
+}
+
+body.is-ops .ops-audience-follow-tooltip-text {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+body.is-ops .job-company-logo {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+body.is-ops .workspace.ops-workspace-no-sidebar .sidebar {
+  display: none;
+}
+
+body.is-ops .workspace.ops-workspace-no-sidebar .detail {
+  max-width: none;
+}
+
+body.is-ops .section {
+  border-radius: 24px;
+}
+
+body.is-ops .section-header {
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+}
+
+body.is-ops .waitlist-table th:first-child,
+body.is-ops .waitlist-table td:first-child {
+  min-width: 12rem;
+  white-space: nowrap;
+}
+
+body.is-ops .ops-user-brand-cell {
+  white-space: nowrap;
+}
+
+body.is-ops .ops-user-brand-label {
+  margin-right: 4px;
+}
+
+body.is-ops .ops-user-clear-brand {
+  background: transparent;
+  border: 0;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  vertical-align: middle;
+}
+
+body.is-ops .ops-user-clear-brand:hover {
+  color: var(--text);
+}
+
+.ops-add-brand-form {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ops-add-brand-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ops-add-brand-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 9px 40px 9px 11px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.ops-add-brand-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ops-add-brand-input::placeholder {
+  color: var(--text-dim);
+}
+
+.ops-add-brand-btn {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  bottom: 2px;
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent-dim);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ops-add-brand-btn:hover {
+  background: transparent;
+  color: var(--accent);
+}
+
+.ops-add-brand-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+/* make "Pages crawled" and "Website summary" consistent with buildSection items */
+#brand-aggregate-host > .brand-website-body {
+  padding: 0;
+  gap: 0;
+}
+.ops-brands-detail .crawl-source-panel {
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.ops-brands-detail .crawl-source-summary {
+  margin-top: 8px;
+  padding: 4px 0;
+}
+.ops-brands-detail .crawl-source-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.ops-brands-detail .crawl-source-body {
+  border-top: none;
+  padding: 8px 0 10px 10px;
+}
+
+.ops-refresh-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.ops-refresh-btn svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+.ops-refresh-btn:hover:not(:disabled) {
+  background: var(--header-bg);
+  color: var(--text);
+}
+.ops-refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+html.ops-host body {
+  /* signal: keeps customer-only side effects clearly off-stage if any
+     shared CSS branches off this attribute. */
+  background: var(--color-bg, #fff);
+}
+
+/* the "no access" gate uses the same modal-overlay shell visuals */
+#ops-no-access .login-box {
+  max-width: 440px;
+  padding: 32px;
+  text-align: center;
+}
+
+#ops-no-access h2 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
+#ops-no-access p {
+  margin: 0;
+  color: var(--color-text-muted, #555);
+}
+
+#ops-signout svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  stroke: none;
+}

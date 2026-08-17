@@ -1,0 +1,6 @@
+name: company_audience_reception_query
+version: 1
+kind: jina_search_query
+notes: Query template for Jina Search aimed at how the public/customers/community actually receive and discuss this brand. {brand_name} is interpolated per run.
+body: |
+  {brand_name} customer reviews community discussion criticism praise reddit forum opinions

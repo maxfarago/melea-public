@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        if (
+          window.location.pathname !== "/m" &&
+          window.matchMedia("(max-width: 760px)").matches
+        ) {
+          window.location.replace(
+            `/m${window.location.search}${window.location.hash}`,
+          );
+        }
+      })();
+    </script>
+    <title>melea - Hijack the trends your audience follows.</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link
+      rel="preload"
+      href="/static/assets/Graphik-semibold.otf"
+      as="font"
+      type="font/otf"
+      crossorigin
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Roboto+Flex:opsz,wght@8..144,400..700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/tokens.css" />
+    <link rel="stylesheet" href="/static/css/shell.css" />
+    <link rel="stylesheet" href="/static/css/sitmar.css" />
+    <link rel="stylesheet" href="/static/css/brands.css" />
+    <link rel="stylesheet" href="/static/css/runs.css" />
+    <link rel="stylesheet" href="/static/css/stories.css" />
+    <link rel="stylesheet" href="/static/css/campaigns.css" />
+    <link rel="stylesheet" href="/static/css/brand-customer.css" />
+  </head>
+  <body>
+    <div id="page-loader">
+      <div class="page-loader-spinner"></div>
+    </div>
+
+    <!-- ===== Login overlay ===== -->
+    <div id="login-overlay" class="login-overlay hidden">
+      <div class="login-box login-box-auth">
+        <div class="auth-copy">
+          <div class="auth-wordmark-stack" role="img" aria-label="Melea">
+            <img
+              class="auth-wordmark-layer auth-wordmark-dark"
+              src="/static/assets/images/melea-charmark-bg-dark.png"
+              alt=""
+            />
+            <img
+              class="auth-wordmark-layer auth-wordmark-regular"
+              src="/static/assets/images/melea-charmark-bg.png"
+              alt=""
+            />
+            <img
+              class="auth-wordmark-layer auth-wordmark-light"
+              src="/static/assets/images/melea-charmark-bg-light.png"
+              alt=""
+            />
+          </div>
+          <h2 class="auth-headline" id="auth-headline">
+            <span class="auth-headline-line">Your situational marketing engine.</span>
+          </h2>
+          <p class="auth-body" id="auth-body">
+            melea drops your brand into the trends your target audience follows — driving engagement and revenue.
+          </p>
+        </div>
+        <div id="clerk-sign-in"></div>
+      </div>
+    </div>
+
+    <div
+      id="add-brand-modal"
+      class="modal-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-brand-modal-title"
+    >
+      <div class="modal-box">
+        <h2 id="add-brand-modal-title">Add brand</h2>
+        <form id="add-brand-form">
+          <div class="field">
+            <label for="add-brand-url">Website URL or domain</label>
+            <input
+              type="text"
+              id="add-brand-url"
+              placeholder="nike.com"
+              autocomplete="off"
+            />
+            <div class="field-hint">
+              Enter a public website domain or URL (for example, nike.com).
+            </div>
+          </div>
+
+          <div class="field-error" id="add-brand-error"></div>
+
+          <div class="modal-actions">
+            <button type="submit" id="add-brand-submit" class="btn-primary">
+              Add brand
+            </button>
+            <button type="button" class="btn-secondary" id="add-brand-cancel">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
+      id="add-sitmar-modal"
+      class="modal-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-sitmar-modal-title"
+    >
+      <div class="modal-box sitmar-modal-box" data-step="1">
+        <div class="sitmar-step-bar">
+          <button
+            type="button"
+            class="sitmar-step-back"
+            id="add-sitmar-back"
+            aria-label="Back"
+          >← Back</button>
+          <h2 id="add-sitmar-modal-title" class="sitmar-step-header">New campaign</h2>
+          <button
+            type="button"
+            class="sitmar-step-close"
+            id="add-sitmar-close"
+            aria-label="Close"
+          >×</button>
+        </div>
+
+        <!-- step 1: brand -->
+        <div class="sitmar-step" data-step="1">
+          <div class="sitmar-tile-grid sitmar-brand-grid" id="add-sitmar-brand-grid"></div>
+          <div class="sitmar-step-empty" id="add-sitmar-brand-empty" hidden>
+            No brands available.
+          </div>
+        </div>
+
+        <!-- step 2: story -->
+        <div class="sitmar-step" data-step="2" hidden>
+          <div class="sitmar-story-step-header">
+            <span id="sitmar-story-sort-label" class="sitmar-story-sort-label">
+              Sorting by recency
+            </span>
+            <button
+              type="button"
+              id="sitmar-story-sort-btn"
+              class="sidebar-header-action"
+              aria-label="Sort stories by recency"
+              title="Sort: recency"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m3 16 4 4 4-4" />
+                <path d="M7 20V4" />
+                <path d="m21 8-4-4-4 4" />
+                <path d="M17 4v16" />
+              </svg>
+            </button>
+          </div>
+          <div class="sitmar-tile-grid sitmar-story-grid" id="add-sitmar-story-grid"></div>
+        </div>
+
+        <!-- step 3: prompt edit -->
+        <div class="sitmar-step" data-step="3" hidden>
+          <form id="add-sitmar-form" class="sitmar-step-form">
+            <div class="sitmar-prompt-edit">
+              <label class="sitmar-prompt-label" for="sitmar-prompt-prefix">
+                Creative brief <span class="sitmar-prompt-hint">(edit freely)</span>
+              </label>
+              <textarea id="sitmar-prompt-prefix" class="sitmar-prompt-textarea" rows="8" spellcheck="false"></textarea>
+              <div class="sitmar-prompt-fixed-label">Fixed directives <span class="sitmar-prompt-hint">(locked)</span></div>
+              <div class="sitmar-prompt-fixed" id="sitmar-prompt-directives"></div>
+            </div>
+
+            <div class="field-error" id="add-sitmar-error"></div>
+
+            <div class="modal-actions">
+              <button type="submit" id="add-sitmar-submit" class="btn-primary">
+                Start campaign
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="trend-filter-modal"
+      class="modal-overlay trend-filter-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="trend-filter-modal-title"
+    >
+      <div class="modal-box trend-filter-modal-box">
+        <h2 id="trend-filter-modal-title">Filter stories</h2>
+        <div class="field-hint">Show stories seen by selected audiences.</div>
+        <div id="trend-filter-audience-list" class="trend-filter-list"></div>
+        <div class="modal-actions">
+          <button type="button" id="trend-filter-clear" class="btn-secondary">
+            Clear
+          </button>
+          <button type="button" id="trend-filter-close" class="btn-primary">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Main app ===== -->
+    <div id="app" class="shell hidden">
+      <div id="global-errors"></div>
+
+      <header class="global-appbar sc-appbar" id="global-appbar">
+        <div class="global-appbar-left">
+          <a class="global-appbar-logo-link" href="/app" aria-label="melea home">
+            <img
+              class="global-appbar-logo"
+              src="/static/assets/images/wordmark-sans-trans.png"
+              alt="melea"
+            />
+          </a>
+        </div>
+
+        <nav class="global-appbar-center" id="global-appbar-nav" aria-label="Primary">
+          <button
+            type="button"
+            class="appbar-nav-btn appbar-ops-only"
+            id="rail-customer"
+            data-view="brands"
+            aria-label="Customer"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M6 20a6 6 0 0 1 12 0" />
+            </svg>
+            <span>Customer</span>
+          </button>
+          <span class="appbar-nav-separator appbar-ops-only" aria-hidden="true"></span>
+          <button
+            type="button"
+            class="appbar-nav-btn appbar-ops-only"
+            data-view="ops-brands"
+            aria-label="Brands"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L3 13V3h10l7.59 7.59a2 2 0 0 1 0 2.82z" />
+              <circle cx="7.5" cy="7.5" r="1.5" />
+            </svg>
+            <span>Brands</span>
+          </button>
+          <button
+            type="button"
+            class="appbar-nav-btn appbar-ops-only"
+            id="rail-audiences"
+            data-view="audiences"
+            aria-label="Audiences"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M16 19a4 4 0 0 0-8 0" />
+              <circle cx="12" cy="11" r="3" />
+              <path d="M22 19a4 4 0 0 0-3-3.87" />
+              <path d="M2 19a4 4 0 0 1 3-3.87" />
+            </svg>
+            <span>Audiences</span>
+          </button>
+          <button
+            type="button"
+            class="appbar-nav-btn appbar-ops-only"
+            id="rail-waitlist"
+            data-view="waitlist"
+            aria-label="Waitlist"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16" />
+              <path d="M4 12h16" />
+              <path d="M4 18h16" />
+            </svg>
+            <span>Waitlist</span>
+            <span class="rail-badge hidden" id="waitlist-badge"></span>
+          </button>
+
+        </nav>
+
+        <div class="global-appbar-right">
+          <div class="appbar-status-group appbar-ops-only">
+            <div
+              class="rail-status-text rail-twitter-spend"
+              id="rail-twitter"
+              aria-label="X API MTD spend"
+            >
+              <svg class="rail-twitter-logo" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.254 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span id="rail-twitter-amount">—</span>
+            </div>
+
+            <div
+              class="rail-status-text rail-anthropic-spend"
+              id="rail-anthropic"
+              aria-label="Anthropic MTD spend"
+            >
+              <svg
+                class="rail-anthropic-logo"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"
+                />
+              </svg>
+              <span id="rail-anthropic-amount">—</span>
+            </div>
+
+            <div
+              class="rail-status-text rail-xai-spend"
+              id="rail-xai"
+              aria-label="xAI MTD spend"
+            >
+              <svg
+                class="rail-xai-logo"
+                fill="currentColor"
+                fill-rule="evenodd"
+                height="1em"
+                style="flex: none; line-height: 1"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <title>Grok</title>
+                <path
+                  d="M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815"
+                ></path>
+              </svg>
+              <span id="rail-xai-amount">—</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="appbar-login"
+            class="appbar-signin-btn appbar-logout-btn"
+            aria-label="Sign In"
+            title="Sign In"
+          >
+            <span>Sign In</span>
+          </button>
+          <div id="appbar-user-menu" class="appbar-user-menu hidden">
+            <button
+              type="button"
+              id="appbar-user-trigger"
+              class="appbar-icon-btn appbar-user-btn"
+              aria-label="Account menu"
+              title="Account"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="appbar-user-dropdown"
+            >
+              <svg viewBox="0 0 256 256" aria-hidden="true">
+                <path
+                  d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"
+                />
+              </svg>
+            </button>
+            <div
+              id="appbar-user-dropdown"
+              class="appbar-user-dropdown hidden"
+              role="menu"
+              aria-label="Account menu"
+            >
+              <div id="appbar-user-email" class="appbar-user-email"></div>
+              <div id="appbar-user-plan" class="appbar-user-plan hidden">
+                <div class="appbar-user-plan-copy">
+                  <span class="appbar-user-plan-label">Current plan</span>
+                  <a
+                    id="appbar-user-plan-upgrade"
+                    class="appbar-user-plan-upgrade hidden"
+                    href="#"
+                    role="menuitem"
+                  >
+                    Upgrade to Grow
+                  </a>
+                </div>
+                <span
+                  id="appbar-user-plan-badge"
+                  class="appbar-user-plan-badge"
+                ></span>
+              </div>
+              <button
+                type="button"
+                id="appbar-logout"
+                class="appbar-user-signout"
+                role="menuitem"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="main">
+        <div class="workspace">
+          <aside class="sidebar">
+          <div class="sidebar-header">
+            <span id="sidebar-title">Brands</span>
+            <div class="sidebar-header-actions">
+              <button
+                type="button"
+                id="sidebar-trend-filter"
+                class="sidebar-header-action hidden"
+                aria-label="Filter"
+                title="Filter audiences"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                id="sidebar-trend-sort"
+                class="sidebar-header-action hidden"
+                aria-label="Sort"
+                title="Sort by recent"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m3 16 4 4 4-4" />
+                  <path d="M7 20V4" />
+                  <path d="m21 8-4-4-4 4" />
+                  <path d="M17 4v16" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                id="sidebar-header-add"
+                class="sidebar-header-action hidden"
+                aria-label="Add brand"
+                title="Add brand"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div id="sidebar-list"></div>
+          </aside>
+
+          <div id="toast-container"></div>
+
+          <main class="detail">
+            <div class="detail-inner" id="detail">
+              <div class="empty-state">Select a tweet from the feed.</div>
+            </div>
+          </main>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+    <script src="/static/js/api-base.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/analytics.js"></script>
+    <script src="/static/js/clerk.js"></script>
+    <script src="/static/js/post-on-x-intro.js"></script>
+    <script src="/static/js/upgrade-chrome.js"></script>
+    <script src="/static/js/distribute-reply-cache.js"></script>
+    <script src="/static/js/state.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/router.js"></script>
+    <script src="/static/js/brand-stages.js"></script>
+    <script src="/static/js/brands.js"></script>
+    <script src="/static/js/modals.js"></script>
+    <script src="/static/js/stages.js"></script>
+    <script src="/static/js/polls.js"></script>
+    <script src="/static/js/status.js"></script>
+    <script src="/static/js/sitmar.js"></script>
+    <!-- audiences.js is ops-only; loaded from /static/ops/index.html instead -->
+    <script src="/static/js/trending.js"></script>
+    <script src="/static/js/app-routes.js"></script>
+    <script src="/static/js/auth-resume.js"></script>
+    <script src="/static/js/init.js"></script>
+  </body>
+</html>

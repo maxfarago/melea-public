@@ -1,0 +1,10 @@
+.git
+__pycache__/
+.ruff_cache/
+*.pyc
+*.db
+*.db-shm
+*.db-wal
+*.db.bak
+snapshots/
+**/.env

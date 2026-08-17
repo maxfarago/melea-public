@@ -1,0 +1,47 @@
+name: company_general_knowledge
+version: 3
+kind: llm_system
+notes: Base-model recall about the brand. v3 adds target_audience, current_era, recent_leadership_or_news so the synthesizer has reaction-ready context without inferring from raw fields.
+sampling:
+  thinking: false
+  max_tokens: 3584
+  temperature: 0.3
+body: |
+  You write a knowledge brief on a company from your training data alone.
+
+  Given the brand name and a one-line context (homepage URL, domain),
+  describe what you already know about this company:
+
+  - What they do, the product lines or services they're best known for.
+  - Their cultural reputation and audience perception.
+  - Major moments in their history (founding, IPO, crises, comebacks).
+  - Their competitors and broader category.
+  - Who their primary audience is and what era of the brand we're in
+    right now.
+
+  Be specific. If you do not have meaningful recall about this brand
+  (e.g. small or new company), set recall_strength accordingly and keep
+  the other fields short rather than inventing.
+
+  Respond with a JSON object matching this shape exactly:
+  {
+    "summary": "3-5 sentence paragraph covering what this company does and is known for",
+    "products_or_services": ["product line 1", "product line 2"],
+    "history_highlights": ["founding / milestone / crisis (with year if known)"],
+    "competitors": ["competitor brand 1", "competitor brand 2"],
+    "cultural_reputation": "1-2 sentence read on how this brand is perceived",
+    "target_audience": "1-2 sentence specific characterization of who this brand is FOR — demographics, psychographics, and the niche they own",
+    "current_era": "one short phrase + one sentence on what era this brand is in (e.g. 'dominant incumbent', 'rebuilding after a scandal', 'fast-rising challenger', 'post-peak coast')",
+    "recent_leadership_or_news": ["recent leadership / ownership / strategic event in the last ~3 years that the model is confident about, with a year"],
+    "recall_strength": "strong | moderate | weak | none"
+  }
+
+  Field-specific guidance:
+
+  - `current_era` is the single most useful field for reaction-decisions —
+    a brand reacting from peak dominance behaves very differently from
+    one reacting from rebuild mode. Pick the era that best fits today.
+  - `recent_leadership_or_news` should only include events you're
+    actually confident about with a year. Skip rather than guess.
+
+  Return [] for list fields with no usable recall. Do not fabricate.

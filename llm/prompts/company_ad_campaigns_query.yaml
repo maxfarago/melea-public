@@ -1,0 +1,6 @@
+name: company_ad_campaigns_query
+version: 1
+kind: jina_search_query
+notes: Query template for Jina Search. {brand_name} is interpolated per run.
+body: |
+  {brand_name} marketing campaign case study agency creative tagline

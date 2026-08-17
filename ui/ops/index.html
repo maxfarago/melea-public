@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>melea ops</title>
+    <link rel="icon" href="/static/favicon-dark.ico" sizes="any" />
+    <link rel="stylesheet" href="/static/css/tokens.css" />
+    <link rel="stylesheet" href="/static/css/shell.css" />
+    <link rel="stylesheet" href="/static/css/brands.css" />
+    <link rel="stylesheet" href="/static/css/brand-customer.css" />
+    <link rel="stylesheet" href="/static/ops/css/ops.css" />
+  </head>
+  <body class="is-ops">
+    <div id="toast-container"></div>
+    <div id="app" class="shell hidden">
+      <header class="global-appbar sc-appbar" id="global-appbar">
+        <div class="global-appbar-left">
+          <a class="global-appbar-logo-link" href="/ops" aria-label="melea ops home">
+            <img class="global-appbar-logo" src="/static/assets/images/wordmark-sans-trans.png" alt="melea" />
+          </a>
+        </div>
+        <nav class="global-appbar-center" id="global-appbar-nav" aria-label="Primary">
+          <button type="button" class="appbar-nav-btn appbar-ops-only" data-view="users" aria-label="Users">
+            <span>Users</span>
+          </button>
+          <button type="button" class="appbar-nav-btn appbar-ops-only" data-view="ops-brands" aria-label="Brands">
+            <span>Brands</span>
+          </button>
+          <button type="button" class="appbar-nav-btn appbar-ops-only" data-view="audiences" aria-label="Audiences">
+            <span>Audiences</span>
+          </button>
+          <button type="button" class="appbar-nav-btn appbar-ops-only" data-view="waitlist" aria-label="Waitlist">
+            <span>Waitlist</span>
+            <span id="waitlist-badge" class="appbar-badge hidden"></span>
+          </button>
+        </nav>
+        <div class="global-appbar-right">
+          <div class="appbar-status-group">
+            <div
+              class="rail-status-text rail-twitter-spend"
+              id="rail-twitter"
+              aria-label="X API MTD spend"
+            >
+              <svg class="rail-twitter-logo" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.254 5.622 5.91-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span id="rail-twitter-amount">—</span>
+            </div>
+
+            <div
+              class="rail-status-text rail-anthropic-spend"
+              id="rail-anthropic"
+              aria-label="Anthropic MTD spend"
+            >
+              <svg
+                class="rail-anthropic-logo"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"
+                />
+              </svg>
+              <span id="rail-anthropic-amount">—</span>
+            </div>
+
+            <div
+              class="rail-status-text rail-xai-spend"
+              id="rail-xai"
+              aria-label="xAI MTD spend"
+            >
+              <svg
+                class="rail-xai-logo"
+                fill="currentColor"
+                fill-rule="evenodd"
+                height="1em"
+                style="flex: none; line-height: 1"
+                viewBox="0 0 24 24"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <title>Grok</title>
+                <path
+                  d="M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815"
+                ></path>
+              </svg>
+              <span id="rail-xai-amount">—</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="appbar-icon-btn"
+            id="ops-signout"
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <svg
+              stroke="currentColor"
+              fill="currentColor"
+              stroke-width="0"
+              viewBox="0 0 32 32"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M 16 4 C 9.382813 4 4 9.382813 4 16 C 4 22.617188 9.382813 28 16 28 C 20.050781 28 23.640625 25.988281 25.8125 22.90625 L 24.1875 21.75 C 22.378906 24.320313 19.390625 26 16 26 C 10.464844 26 6 21.535156 6 16 C 6 10.464844 10.464844 6 16 6 C 19.390625 6 22.375 7.679688 24.1875 10.25 L 25.8125 9.09375 C 23.640625 6.011719 20.050781 4 16 4 Z M 23.34375 11.28125 L 21.90625 12.71875 L 24.1875 15 L 12 15 L 12 17 L 24.1875 17 L 21.90625 19.28125 L 23.34375 20.71875 L 27.34375 16.71875 L 28.03125 16 L 27.34375 15.28125 Z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="main">
+        <div class="workspace">
+          <aside class="sidebar">
+            <div class="sidebar-header">
+              <span id="sidebar-title">Brands</span>
+            </div>
+            <div id="sidebar-list"></div>
+          </aside>
+
+          <main class="detail">
+            <div class="detail-inner" id="detail">
+              <div class="empty-state">Loading…</div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+    <script src="/static/js/api-base.js"></script>
+    <script src="/static/ops/js/ops-api.js"></script>
+    <script src="/static/ops/js/ops-clerk.js"></script>
+    <script src="/static/js/brand-stages.js"></script>
+    <script src="/static/ops/js/ops-brand-detail.js"></script>
+    <script src="/static/ops/js/ops-brands.js"></script>
+    <script src="/static/ops/js/audiences.js"></script>
+    <script src="/static/ops/js/waitlist.js"></script>
+    <script src="/static/ops/js/users.js"></script>
+    <script src="/static/ops/js/spend.js"></script>
+    <script src="/static/ops/js/ops-shell.js"></script>
+  </body>
+</html>
