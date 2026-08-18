@@ -1,14 +1,16 @@
 # melea
 
-melea: situational marketing for brands. crawl a website, learn the brand, watch what its audiences see in the news, then draft the post.
+melea: situational marketing for brands. discover the trending news your users are reading on social media as they emerge, then hijack the narrative with on-brand posts.
+
+combines frontier ai and old-school crawling to learn a company's brand and determine their audience. then watches what its users see on social media and drafts posts in their voice.
 
 ## overview
 
-python / fastapi. playwright scrape of x explore as in-house audience personas. embeddings for brand↔story relevance. a guided opus chat (sitmar) that turns a trending story into tweet drafts.
+python / fastapi. playwright scrape of x/twitter's personalized news to discover emerging narratives and locate the highest-engagement posts to respond to.
 
-the prod service has been sunsetted. ci/cd, aws provision, and a linkedin-stories experiment are not included in this public version of the codebase.
+parses brand and audience from the company's marketing, website, and linkedin data. leverages word embeddings for brand↔story to find the most relevant trends. a custom-guided ai chat then collaborates with the user to draft posts that respond with the brand's voice and pov.
 
-brand profiling and the sitmar chat were written with agents in the loop. the news scraper — cookie injection, residential-proxy rotation, explore-tab parse, fuzzy headline dedup — is the systems piece.
+the prod service has been sunsetted. auth, admin, aws provisioning, reporting, and ci/cd are not included in this public version of the codebase.
 
 ## architecture
 
@@ -16,36 +18,35 @@ brand profiling and the sitmar chat were written with agents in the loop. the ne
 brand website
         │
         ▼
-   jina / scrapingbee
+   jina / scraping
         │
         ▼
-   llm synthesis ──► generated audiences ──► match to in-house catalog
+   llm synthesis ──► audience generation
         │
         ▼
-   brand embedding
-                ▲
-                │ cosine (python)
-                │
-x explore ──► playwright (per-persona cookies + proxy)
+       brand embedding
+                    ▲
+                    │ cosine similarity
+                    │
+x/twitter news ──► playwright
         │
         ▼
-   parse / fuzzy dedup
-        ├─ trending_stories
-        ├─ audience_story_sightings
-        └─ story embedding
+   parse / fuzzy dedupe
+        ├─ trending stories
+        ├─ audience sightings
+        └─ story embeddings
                 │
                 ▼
            api (fastapi)
-           /app  /m  /ops
                 │
-                └─► sitmar  (opus: seeds → confirm → tweets)
+                └─► sitmar  (story → post drafts)
 ```
 
-- **brand pipeline** — homepage crawl, linkedin company page, audience generation, catalog match, brand synthesis. stages write status so the ui can poll.
-- **news** — each scrape runs as one assigned persona. x personalizes explore, so `audience_story_sightings` is the product, not just a login bypass.
-- **relevance** — story document is headline + topic + summary; brand document is name + synthesis + audience titles. hnsw indexes exist; ranking is cosine in python.
-- **sitmar** — pick brand + story, opus proposes 3 campaign seeds, a confirmation turn locks a seed and offers vibe chips, then 3 tweet drafts. not a one-shot prompt.
-- **ui** — customer desktop (three-column dashboard), mobile shell, ops shell. clerk is two apps: customer vs invite-only ops.
+- **brand pipeline** — homepage crawl, linkedin company page, audience generation, catalog match, brand synthesis
+- **news** — for each assigned persona, x personalizes news, so `audience_story_sightings` is the actual product output
+- **relevance** — story document is headline + topic + summary; brand document is brand synthesis + audience title; cosine similarity ranking
+- **sitmar** — pick brand + story, llm proposes 3 campaign story seeds. once seed is locked, llm offers vibe chips, and post drafts
+- **ui** — customer desktop (three-column dashboard), mobile shell, ops shell
 
 ## license
 

@@ -8,19 +8,12 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 
-from api import auth
+from api.auth import PUBLIC_USER
 from api.db.sqlite import db
 from api.main import app
 from commons.config import settings
 
 pytestmark = pytest.mark.postgres
-
-
-class _OpsVerifier:
-    def verify(self, token: str) -> dict[str, str]:
-        if token == "token":
-            return {"sub": "ops_user"}
-        raise auth.ClerkAuthError("invalid token")
 
 
 @pytest.fixture
@@ -29,8 +22,6 @@ def client(tmp_path, monkeypatch, postgres_dsn):
     monkeypatch.setattr(db, "_db_path", db_path)
     monkeypatch.setattr(settings, "db_path", db_path)
     monkeypatch.setattr(settings, "database_url", postgres_dsn)
-    monkeypatch.setattr(settings, "site_access_password", "")
-    monkeypatch.setattr(auth, "get_ops_verifier", lambda: _OpsVerifier())
     with TestClient(app) as test_client:
         yield test_client
 
@@ -41,45 +32,6 @@ def test_post_companies_works_without_auth(client):
     body = resp.json()
     assert body["created"] is True
     assert body["company"]["website_url"].rstrip("/") == "https://example.com"
-
-
-def test_post_companies_allows_bearer_without_company(client, monkeypatch):
-    monkeypatch.setattr(auth, "verify_token", lambda token: {"sub": "user_1"})
-
-    resp = client.post(
-        "/api/companies",
-        json={"website_url": "https://example.com"},
-        headers={"Authorization": "Bearer token"},
-    )
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["created"] is True
-    assert body["company"]["website_url"].rstrip("/") == "https://example.com"
-
-
-def test_post_companies_rejects_bearer_with_company_in_db(client, monkeypatch):
-    created = client.post("/api/companies", json={"website_url": "https://co-existing.com"})
-    company_id = created.json()["company"]["id"]
-    monkeypatch.setattr(auth, "verify_token", lambda token: {"sub": "user_1"})
-    monkeypatch.setattr(
-        "api.routes.identity.fetch_clerk_user_profile",
-        AsyncMock(return_value={}),
-    )
-
-    claim = client.post(
-        "/api/me/claim",
-        json={"company_id": company_id},
-        headers={"Authorization": "Bearer token"},
-    )
-    assert claim.status_code == 200
-
-    resp = client.post(
-        "/api/companies",
-        json={"website_url": "https://another.com"},
-        headers={"Authorization": "Bearer token"},
-    )
-    assert resp.status_code == 403
-    assert resp.json()["detail"] == "You already have a brand."
 
 
 def test_post_companies_existing_does_not_reset_crawl(client, monkeypatch):
@@ -123,14 +75,9 @@ def test_post_companies_www_and_apex_resolve_to_same_company(client):
     assert second_body["company"]["website_url"].rstrip("/") == "https://usefastlane.ai"
 
 
-def test_get_companies_requires_ops_auth(client):
-    resp = client.get("/api/ops/companies", headers={"Authorization": "Bearer token"})
-    assert resp.status_code == 200
-
-
-def test_get_companies_summary_for_ops_user(client):
+def test_get_companies_summary_for_ops(client):
     client.post("/api/companies", json={"website_url": "https://admin-list.com"})
-    resp = client.get("/api/ops/companies", headers={"Authorization": "Bearer token"})
+    resp = client.get("/api/ops/companies")
     assert resp.status_code == 200
     companies = resp.json()["companies"]
     assert len(companies) >= 1
@@ -140,81 +87,29 @@ def test_get_companies_summary_for_ops_user(client):
     assert row["logo_url"] == "https://www.google.com/s2/favicons?domain=admin-list.com&sz=128"
 
 
-def test_me_claim_attaches_user(client, monkeypatch):
+def test_me_claim_attaches_public_user(client):
     created = client.post("/api/companies", json={"website_url": "https://claim.com"})
     company_id = created.json()["company"]["id"]
-    monkeypatch.setattr(auth, "verify_token", lambda token: {"sub": "claim_user_1"})
-    monkeypatch.setattr(
-        "api.routes.identity.fetch_clerk_user_profile",
-        AsyncMock(
-            return_value={
-                "email": "user@example.com",
-                "full_name": "Test User",
-                "image_url": "https://img.clerk.com/user.png",
-            }
-        ),
-    )
 
-    resp = client.post(
-        "/api/me/claim",
-        json={"company_id": company_id},
-        headers={"Authorization": "Bearer token"},
-    )
+    resp = client.post("/api/me/claim", json={"company_id": company_id})
     assert resp.status_code == 200
     body = resp.json()
     assert body["company_id"] == company_id
     assert body["claimed"] is True
 
-    me = client.get("/api/me", headers={"Authorization": "Bearer token"})
+    me = client.get("/api/me")
     assert me.status_code == 200
     profile = me.json()
-    assert profile["email"] == "user@example.com"
-    assert profile["full_name"] == "Test User"
-    assert profile["image_url"] == "https://img.clerk.com/user.png"
+    assert profile["user_id"] == PUBLIC_USER
+    assert profile["company_id"] == company_id
 
-    again = client.post(
-        "/api/me/claim",
-        json={"company_id": "other"},
-        headers={"Authorization": "Bearer token"},
-    )
+    again = client.post("/api/me/claim", json={"company_id": "other"})
     assert again.status_code == 200
     assert again.json()["company_id"] == company_id
     assert again.json()["claimed"] is False
 
 
-@pytest.mark.asyncio
-async def test_me_claim_succeeds_when_webhook_user_has_no_company(client, monkeypatch):
-    created = client.post("/api/companies", json={"website_url": "https://webhook-claim.com"})
-    company_id = created.json()["company"]["id"]
-    await db.upsert_user_profile(
-        "webhook_user_1",
-        email="webhook@example.com",
-        full_name="Webhook User",
-        image_url="",
-    )
-    monkeypatch.setattr(auth, "verify_token", lambda token: {"sub": "webhook_user_1"})
-    monkeypatch.setattr(
-        "api.routes.identity.fetch_clerk_user_profile",
-        AsyncMock(
-            return_value={
-                "email": "webhook@example.com",
-                "full_name": "Webhook User",
-                "image_url": "",
-            }
-        ),
-    )
-
-    resp = client.post(
-        "/api/me/claim",
-        json={"company_id": company_id},
-        headers={"Authorization": "Bearer token"},
-    )
-    assert resp.status_code == 200
-    assert resp.json()["company_id"] == company_id
-    assert resp.json()["claimed"] is True
-
-
-def test_me_reset_brand_requires_ops_auth(client, monkeypatch):
+def test_me_reset_brand_clears_public_user(client, monkeypatch):
     clear_db_mock = AsyncMock(return_value=True)
     monkeypatch.setattr(
         "api.routes.identity.db.clear_user_company_association",
@@ -231,27 +126,13 @@ def test_me_reset_brand_requires_ops_auth(client, monkeypatch):
         ),
     )
 
-    ok = client.post(
-        "/api/ops/me/reset-brand",
-        headers={"Authorization": "Bearer token"},
-    )
+    ok = client.post("/api/ops/me/reset-brand")
     assert ok.status_code == 200
     assert ok.json() == {"ok": True, "changed": True}
-    clear_db_mock.assert_awaited_once_with("ops_user")
-
-    denied = client.post("/api/ops/me/reset-brand")
-    assert denied.status_code == 401
+    clear_db_mock.assert_awaited_once_with(PUBLIC_USER)
 
 
-def test_me_reset_brand_rejects_invalid_ops_token(client):
-    resp = client.post(
-        "/api/ops/me/reset-brand",
-        headers={"Authorization": "Bearer bad-token"},
-    )
-    assert resp.status_code == 401
-
-
-def test_ops_user_reset_brand_clears_user_company(client, monkeypatch):
+def test_ops_user_reset_brand_clears_user_company(client):
     created = client.post("/api/companies", json={"website_url": "https://brand.com"})
     company_id = created.json()["company"]["id"]
 
@@ -260,10 +141,7 @@ def test_ops_user_reset_brand_clears_user_company(client, monkeypatch):
 
     asyncio.run(_setup_user())
 
-    resp = client.post(
-        "/api/ops/users/user_target/reset-brand",
-        headers={"Authorization": "Bearer token"},
-    )
+    resp = client.post("/api/ops/users/user_target/reset-brand")
     assert resp.status_code == 200
     assert resp.json() == {"ok": True, "changed": True}
 
@@ -277,42 +155,8 @@ def test_ops_user_reset_brand_clears_user_company(client, monkeypatch):
 
 
 def test_ops_user_reset_brand_not_found(client):
-    resp = client.post(
-        "/api/ops/users/user_missing/reset-brand",
-        headers={"Authorization": "Bearer token"},
-    )
+    resp = client.post("/api/ops/users/user_missing/reset-brand")
     assert resp.status_code == 404
-
-
-def test_ops_user_reset_brand_requires_ops_auth(client):
-    resp = client.post("/api/ops/users/user_target/reset-brand")
-    assert resp.status_code == 401
-
-
-def test_signed_in_user_cannot_read_other_company(client, monkeypatch):
-    first = client.post("/api/companies", json={"website_url": "https://mine.com"})
-    second = client.post("/api/companies", json={"website_url": "https://theirs.com"})
-    mine_id = first.json()["company"]["id"]
-    theirs_id = second.json()["company"]["id"]
-
-    async def _setup_user():
-        await db.upsert_user("scoped_user", mine_id)
-
-    asyncio.run(_setup_user())
-    monkeypatch.setattr(
-        auth,
-        "verify_token",
-        lambda token: {"sub": "scoped_user"},
-    )
-
-    ok = client.get(f"/api/company/{mine_id}", headers={"Authorization": "Bearer token"})
-    assert ok.status_code == 200
-
-    denied = client.get(
-        f"/api/company/{theirs_id}",
-        headers={"Authorization": "Bearer token"},
-    )
-    assert denied.status_code == 403
 
 
 def test_anon_can_read_company_by_id(client):
@@ -395,7 +239,7 @@ def test_get_company_stories_json_response(client):
     )
     assert resp.status_code == 200
     body = resp.json()
-    assert body["gated"] is True
+    assert body["gated"] is False
     assert len(body["stories"]) == 1
     story = body["stories"][0]
     assert story["story_id"] == story_id

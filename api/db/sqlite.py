@@ -24,7 +24,6 @@ from api.db.companies import Company as Company, CompanyMixin
 from api.db.migrations import MigrationsMixin
 from api.db.sitmar import SituationalCampaign as SituationalCampaign, SitmarMixin
 from api.db.stories import StoriesMixin
-from api.db.stripe import StripeMixin
 from api.db.users import UserMixin
 from commons.config import settings
 
@@ -413,7 +412,6 @@ class CoreDatabase(
     StoriesMixin,
     CompanyMixin,
     UserMixin,
-    StripeMixin,
 ):
     _schema = _SCHEMA
 

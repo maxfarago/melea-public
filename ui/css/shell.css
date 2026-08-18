@@ -703,7 +703,7 @@ select[aria-invalid="true"] {
 }
 .auth-headline {
   margin: 0 0 8px;
-  font-family: "Graphik", var(--display);
+  font-family: var(--display);
   font-size: 26px;
   font-weight: 600;
   color: var(--accent-dim);
@@ -1478,7 +1478,7 @@ select {
       transparent var(--score-pct)
     ),
     color-mix(in srgb, var(--score-color) 9%, transparent);
-  font-family: "DM Mono", monospace;
+  font-family: var(--mono, ui-monospace, monospace);
   font-size: 11px;
   font-weight: 600;
   color: color-mix(in srgb, var(--score-color) 82%, var(--text));

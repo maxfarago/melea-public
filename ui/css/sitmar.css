@@ -1121,7 +1121,7 @@
   position: relative;
   z-index: 2;
   margin: 0;
-  font-family: "Graphik", var(--display);
+  font-family: var(--display);
   font-size: 1.375rem;
   font-weight: 700;
   line-height: 1.25;

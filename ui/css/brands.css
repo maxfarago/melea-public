@@ -1551,11 +1551,7 @@ body:not(.is-ops) .global-appbar-center {
   border: 1px solid var(--border);
   background: #fff;
   z-index: 40;
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
 }
 .appbar-user-email {
   padding: 8px 10px 10px;
@@ -1596,7 +1592,7 @@ body:not(.is-ops) .global-appbar-center {
   height: 30px;
   padding: 0 13px;
   border-radius: 6px;
-  font-family: "Graphik", var(--display);
+  font-family: var(--display);
   font-size: 14px;
   font-weight: 700;
   line-height: 1;
@@ -1627,11 +1623,7 @@ body:not(.is-ops) .global-appbar-center {
   padding: 8px 10px;
   background: transparent;
   color: var(--text-dim);
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   font-size: 13px;
   font-weight: 600;
   text-align: left;

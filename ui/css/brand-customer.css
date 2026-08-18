@@ -604,13 +604,7 @@ button.brand-create-enter {
   box-shadow: none;
 }
 .pre-brand-overlay-kicker {
-  font-family:
-    "Sohne Bold",
-    "Sohne",
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 0;

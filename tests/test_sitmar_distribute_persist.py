@@ -6,7 +6,6 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-from api import auth
 from api.db.sqlite import db
 from api.main import app
 from commons.config import settings
@@ -18,7 +17,6 @@ def client(tmp_path, monkeypatch, postgres_dsn):
     monkeypatch.setattr(db, "_db_path", db_path)
     monkeypatch.setattr(settings, "db_path", db_path)
     monkeypatch.setattr(settings, "database_url", postgres_dsn)
-    monkeypatch.setattr(settings, "site_access_password", "")
     with TestClient(app) as test_client:
         yield test_client
 
@@ -40,15 +38,12 @@ def _seed_posted_campaign(user_id: str) -> str:
 
 
 @pytest.mark.postgres
-def test_distribute_sent_and_skip_persist(client, monkeypatch):
-    monkeypatch.setattr(auth, "verify_token", lambda token: {"sub": "user_1"})
+def test_distribute_sent_and_skip_persist(client):
     campaign_id = _seed_posted_campaign("user_1")
-    headers = {"Authorization": "Bearer token"}
 
     skip = client.post(
         f"/api/sitmar/{campaign_id}/distribute-skip",
         json={"post_key": "story-1:post-a"},
-        headers=headers,
     )
     assert skip.status_code == 200
 
@@ -63,11 +58,10 @@ def test_distribute_sent_and_skip_persist(client, monkeypatch):
                 "author_handle": "acct",
             },
         },
-        headers=headers,
     )
     assert sent.status_code == 200
 
-    detail = client.get(f"/api/sitmar/{campaign_id}", headers=headers)
+    detail = client.get(f"/api/sitmar/{campaign_id}")
     assert detail.status_code == 200
     campaign = detail.json()["campaign"]
     assert "story-1:post-a" in campaign["distribute_dismissed"]
@@ -79,9 +73,7 @@ def test_distribute_sent_and_skip_persist(client, monkeypatch):
 
 
 @pytest.mark.postgres
-def test_distribute_requires_posted_status(client, monkeypatch):
-    monkeypatch.setattr(auth, "verify_token", lambda token: {"sub": "user_2"})
-
+def test_distribute_requires_posted_status(client):
     async def setup() -> str:
         company_id = str(uuid.uuid4())
         campaign = await db.create_situational_campaign(
@@ -93,10 +85,8 @@ def test_distribute_requires_posted_status(client, monkeypatch):
         return campaign.id
 
     campaign_id = asyncio.run(setup())
-    headers = {"Authorization": "Bearer token"}
     resp = client.post(
         f"/api/sitmar/{campaign_id}/distribute-skip",
         json={"post_key": "story-2:post-a"},
-        headers=headers,
     )
     assert resp.status_code == 400

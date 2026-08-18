@@ -1,6 +1,6 @@
 # api
 
-fastapi app: brand onboarding, news stories, sitmar campaigns, clerk + stripe.
+fastapi app: brand onboarding, news stories, sitmar campaigns.
 
 local:
 

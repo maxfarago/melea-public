@@ -110,27 +110,3 @@ async def test_list_users_with_company_join(pg_db):
     assert match["company_id"] == company_id
     assert match["business_name"] == "Ares"
     assert match["website_url"] == "https://ares.example"
-
-
-@pytest.mark.postgres
-@pytest.mark.asyncio
-async def test_stripe_subscription_and_event_dedupe(pg_db):
-    clerk_id = f"user_{uuid.uuid4().hex}"
-    event_id = f"evt_{uuid.uuid4().hex}"
-    await pg_db.upsert_user_profile(
-        clerk_id,
-        email="stripe@example.com",
-        full_name="Stripe User",
-        image_url="",
-    )
-    assert await pg_db.is_stripe_event_processed(event_id) is False
-    await pg_db.mark_stripe_event_processed(event_id, "checkout.session.completed")
-    assert await pg_db.is_stripe_event_processed(event_id) is True
-    await pg_db.sync_user_subscription_from_clerk(
-        clerk_id,
-        plan="starter",
-        subscription_status="active",
-    )
-    plan, status = await pg_db.get_user_plan(clerk_id)
-    assert plan == "starter"
-    assert status == "active"

@@ -17,10 +17,8 @@ dependencies = [
     "playwright>=1.49",
     "pydantic>=2.9",
     "pydantic-settings>=2.5",
-    "pyjwt[crypto]>=2.9",
     "python-multipart>=0.0.9",
     "pyyaml>=6.0",
-    "stripe>=10.0",
     "uvicorn[standard]>=0.32",
 ]
 

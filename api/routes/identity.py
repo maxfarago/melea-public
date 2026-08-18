@@ -1,32 +1,13 @@
 from __future__ import annotations
 
-from urllib.parse import urlparse
-
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from api.auth import (
-    require_auth,
-    require_claims,
-    require_ops_auth,
-    resolve_user_company_id,
-)
-from api.clerk_users import fetch_clerk_user_profile
+from api.auth import PUBLIC_USER, require_ops_auth, resolve_user_company_id
 from api.db.sqlite import db
 from commons.config import settings
 
 router = APIRouter()
-
-
-def _request_ui_host(request: Request) -> str:
-    origin = (request.headers.get("origin") or "").strip()
-    if origin:
-        return (urlparse(origin).hostname or "").lower()
-    return (request.headers.get("host") or "").lower().split(":", 1)[0]
-
-
-def _is_ops_ui_request(request: Request) -> bool:
-    return _request_ui_host(request).startswith("ops.")
 
 
 def _profile_payload(user_row) -> dict[str, str | None]:
@@ -39,66 +20,20 @@ def _profile_payload(user_row) -> dict[str, str | None]:
     }
 
 
-async def _user_row_with_profile(user_id: str):
-    row = await db.get_user_by_clerk_id(user_id)
-    if row is None:
-        return None
-    if row.email or row.full_name or row.image_url:
-        return row
-    profile = await fetch_clerk_user_profile(user_id)
-    if not any(profile.values()):
-        return row
-    await db.update_user_profile(user_id, **profile)
-    return await db.get_user_by_clerk_id(user_id)
-
-
-async def _create_user_with_profile(user_id: str, company_id: str):
-    profile = await fetch_clerk_user_profile(user_id)
-    return await db.upsert_user(user_id, company_id, **profile)
-
-
 @router.get("/api/config")
-async def config(request: Request) -> dict:
-    """public bootstrap config for the no-build frontend.
-
-    Returns the publishable key for whichever Clerk app the UI belongs to.
-    Cross-origin static sites call from `Origin`; same-origin/local falls back
-    to `Host` (ops.localhost, nginx-served dev, etc.).
-
-    Only publishable keys are exposed (safe by design — they're public).
-    """
-    publishable_key = (
-        settings.clerk_ops_publishable_key
-        if _is_ops_ui_request(request)
-        else settings.clerk_publishable_key
-    )
-    return {
-        "clerk_publishable_key": publishable_key,
-        "ga_measurement_id": settings.ga_measurement_id.strip(),
-        "stripe_links": {
-            "rise": {
-                "monthly": settings.stripe_link_starter_monthly.strip(),
-                "annual": settings.stripe_link_starter_annual.strip(),
-            },
-            "grow": {
-                "monthly": settings.stripe_link_pro_monthly.strip(),
-                "annual": settings.stripe_link_pro_annual.strip(),
-            },
-        },
-    }
+async def config() -> dict:
+    return {"ga_measurement_id": settings.ga_measurement_id.strip()}
 
 
 @router.get("/api/me")
-async def me(request: Request, user: str = Depends(require_auth)) -> dict:
-    claims = await require_claims(request)
-    company_id = await resolve_user_company_id(user, claims)
-    user_row = await _user_row_with_profile(user)
-    plan, subscription_status = await db.get_user_plan(user)
+async def me() -> dict:
+    company_id = await resolve_user_company_id(PUBLIC_USER)
+    user_row = await db.get_user_by_clerk_id(PUBLIC_USER)
     return {
-        "user_id": user,
+        "user_id": PUBLIC_USER,
         "company_id": company_id or None,
-        "plan": plan,
-        "subscription_status": subscription_status,
+        "plan": "pro",
+        "subscription_status": "active",
         **_profile_payload(user_row),
     }
 
@@ -108,13 +43,8 @@ class ClaimCompanyBody(BaseModel):
 
 
 @router.post("/api/me/claim")
-async def claim_company(
-    body: ClaimCompanyBody,
-    request: Request,
-    user: str = Depends(require_auth),
-) -> dict:
-    claims = await require_claims(request)
-    existing = await db.get_user_by_clerk_id(user)
+async def claim_company(body: ClaimCompanyBody) -> dict:
+    existing = await db.get_user_by_clerk_id(PUBLIC_USER)
     if existing and existing.company_id:
         company = await db.get_company(existing.company_id)
         if company is None:
@@ -125,30 +55,16 @@ async def claim_company(
             "claimed": False,
         }
 
-    from_metadata = await resolve_user_company_id(user, claims)
-    if from_metadata:
-        company = await db.get_company(from_metadata)
-        if company is None:
-            raise HTTPException(status_code=404, detail="Company not found.")
-        await _create_user_with_profile(user, from_metadata)
-        return {
-            "company_id": from_metadata,
-            "company": company.to_dict(),
-            "claimed": False,
-        }
-
     company_id = str(body.company_id or "").strip()
     if not company_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="company_id is required.",
         )
-
     company = await db.get_company(company_id)
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found.")
-
-    await _create_user_with_profile(user, company_id)
+    await db.upsert_user(PUBLIC_USER, company_id, email="", full_name="", image_url="")
     return {
         "company_id": company_id,
         "company": company.to_dict(),
@@ -163,11 +79,9 @@ async def reset_user_brand(clerk_user_id: str) -> dict[str, bool]:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="clerk_user_id is required.",
         )
-
     user = await db.get_user_by_clerk_id(clerk_user_id)
     if not user or not user.company_id:
         return {"ok": True, "changed": False}
-
     await db.clear_user_company_association(clerk_user_id)
     return {"ok": True, "changed": True}
 

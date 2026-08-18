@@ -193,12 +193,10 @@ async def _enrich_campaign(campaign: Any) -> dict[str, Any]:
     return data
 
 
-async def _require_campaign_owner(campaign_id: str, user_id: str) -> SituationalCampaign:
+async def _require_campaign_owner(campaign_id: str, _user_id: str) -> SituationalCampaign:
     campaign = await db.get_situational_campaign(campaign_id)
     if campaign is None:
         raise HTTPException(status_code=404, detail="Campaign not found.")
-    if campaign.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Forbidden.")
     return campaign
 
 

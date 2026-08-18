@@ -14,7 +14,6 @@ from fastapi.staticfiles import StaticFiles
 from api.db.sqlite import db
 from api.prompts import seed_prompts_from_yaml
 from api.routes.audiences import router as audiences_router
-from api.routes.clerk_webhook import router as clerk_webhook_router
 from api.routes.companies import router as companies_router
 from api.routes.health import router as health_router
 from api.routes.home import router as home_router
@@ -23,9 +22,7 @@ from api.routes.ops import router as ops_router
 from api.routes.posts import router as posts_router
 from api.routes.root import STATIC_DIR, router as root_router
 from api.routes.sitmar import router as sitmar_router
-from api.routes.stripe import router as stripe_router
 from api.routes.waitlist import router as waitlist_router
-from api.site_gate import router as site_gate_router, site_gate_middleware
 from commons.log import configure_logging
 
 log = logging.getLogger(__name__)
@@ -67,7 +64,7 @@ app.add_middleware(
     ),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Content-Type"],
 )
 
 
@@ -90,13 +87,7 @@ async def waitlist_cors(request: Request, call_next):
     return response
 
 
-@app.middleware("http")
-async def site_gate(request: Request, call_next):
-    return await site_gate_middleware(request, call_next)
-
-
 app.include_router(root_router)
-app.include_router(site_gate_router)
 app.include_router(identity_router)
 app.include_router(health_router)
 app.include_router(posts_router)
@@ -106,6 +97,4 @@ app.include_router(ops_router)
 app.include_router(sitmar_router)
 app.include_router(home_router)
 app.include_router(waitlist_router)
-app.include_router(stripe_router)
-app.include_router(clerk_webhook_router)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

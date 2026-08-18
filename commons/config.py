@@ -10,20 +10,6 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Auth — customer Clerk app (app.melea.ai etc.)
-    clerk_publishable_key: str = ""
-    clerk_secret_key: str = ""
-    clerk_authorized_parties: str = ""
-    clerk_webhook_secret: str = ""
-
-    # Auth — separate ops Clerk app (ops.melea.ai). Empty publishable key
-    # disables ops auth entirely — /api/ops/* endpoints will 503.
-    clerk_ops_publishable_key: str = ""
-    clerk_ops_secret_key: str = ""
-    clerk_ops_authorized_parties: str = ""
-
-    site_access_password: str = ""
-    site_gate_cookie_secret: str = ""
     melea_company_website_url: str = "melea.ai"
     ga_measurement_id: str = ""
 
@@ -53,20 +39,6 @@ class Settings(BaseSettings):
     jina_api_key: str = ""
     scrapingbee_api_key: str = ""
     twitter_bearer_token: str = ""
-
-    # Stripe
-    stripe_secret_key: str = ""
-    stripe_webhook_secret: str = ""
-    stripe_price_starter: str = ""
-    stripe_price_starter_monthly: str = ""
-    stripe_price_starter_annual: str = ""
-    stripe_price_pro: str = ""
-    stripe_price_pro_monthly: str = ""
-    stripe_price_pro_annual: str = ""
-    stripe_link_starter_monthly: str = ""
-    stripe_link_starter_annual: str = ""
-    stripe_link_pro_monthly: str = ""
-    stripe_link_pro_annual: str = ""
 
     # Persistence
     db_path: str = "./melea.db"

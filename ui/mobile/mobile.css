@@ -1,27 +1,3 @@
-@font-face {
-  font-family: "Graphik";
-  src: url("/static/assets/Graphik-semibold.otf") format("opentype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: block;
-}
-@font-face {
-  font-family: "Sohne";
-  src: url("/static/assets/Sohne-medium.otf") format("opentype");
-  font-weight: 500 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Sohne Bold";
-  src:
-    url("/static/assets/Sohne-bold.woff2") format("woff2"),
-    url("/static/assets/Sohne-bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --bg: #fdfcf8;
   --panel: #f0eee9;
@@ -53,13 +29,9 @@
   --chrome-bg: #fdfcf8;
   --tab-bg: #fdfcf8;
   --tab-h: 64px;
-  --display: "Sohne", "Roboto Flex", system-ui, -apple-system, sans-serif;
+  --display: system-ui, -apple-system, sans-serif;
   --display-size: 22px;
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
 }
 
 * {
@@ -235,7 +207,7 @@ a {
 }
 
 .post-on-x-intro-overlay .post-on-x-intro-title {
-  font-family: "Graphik", var(--display);
+  font-family: var(--display);
   font-size: 22px;
   margin: 0;
 }
@@ -772,7 +744,7 @@ a {
 
 .auth-headline {
   margin: 0 0 8px;
-  font-family: "Graphik", var(--display);
+  font-family: var(--display);
   font-size: 20px;
   font-weight: 600;
   color: var(--accent-dim);
@@ -1593,11 +1565,7 @@ html.mobile-upbar-visible
   padding: 0 10px;
   background: transparent;
   color: var(--sc-ink3);
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -1824,13 +1792,7 @@ html.mobile-upbar-visible
 }
 
 .pre-brand-overlay-kicker {
-  font-family:
-    "Sohne Bold",
-    "Sohne",
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 0;
@@ -2413,11 +2375,7 @@ html.mobile-upbar-visible
   flex-shrink: 0;
   border: 0;
   border-radius: 50%;
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   color: #fff;
   background: linear-gradient(
     135deg,
@@ -2486,11 +2444,7 @@ html.mobile-upbar-visible
   --sc-r: 20px;
   background: var(--bg);
   color: var(--sc-ink);
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   gap: 0;
   overflow: hidden;
   min-height: 0;
@@ -2509,11 +2463,7 @@ html.mobile-upbar-visible
   --sc-r: 20px;
   background: var(--bg);
   color: var(--sc-ink);
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   gap: 0;
   overflow: hidden;
   height: calc(
@@ -2698,11 +2648,7 @@ html.mobile-upbar-visible
   gap: 5px;
   width: auto;
   height: auto;
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   font-size: 12px;
   font-weight: 400;
   color: var(--sc-ink2);
@@ -3088,13 +3034,7 @@ html.mobile-upbar-visible
 }
 
 .stories-customer-detail .sc-detail-label {
-  font-family:
-    "Sohne Bold",
-    "Sohne",
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -3286,11 +3226,7 @@ html.mobile-upbar-visible
   border: 0;
   border-radius: 50%;
   padding: 0;
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   color: #fff;
   background: linear-gradient(
     135deg,
@@ -5110,11 +5046,7 @@ html.mobile-upbar-visible
   --sc-r: 20px;
   background: var(--bg);
   color: var(--sc-ink);
-  font-family:
-    "Roboto Flex",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--display);
   gap: 0;
   overflow: visible;
   min-height: calc(
